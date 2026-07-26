@@ -31,7 +31,7 @@ menu_items = [
         "image": "quesadilla_taco.png"
     },
     
-    # ---- TANDA 2: FITNESS (Platos Originales) ----
+    # ---- TANDA 2: FITNESS (Platos Originales con la actualización del viernes) ----
     {
         "id": 6, "day": "Lunes", "title": "Lean Power Bowl", "category": "Fitness", "active": False,
         "desc": "A nutrient-dense bowl with fluffy tri-color quinoa, roasted chickpeas and sweet potato.",
@@ -53,12 +53,13 @@ menu_items = [
         "image": "Eteak_fit.png"
     },
     {
-        "id": 10, "day": "Viernes", "title": "Protein Arepa Fit", "category": "Fitness", "active": False,
-        "desc": "High-protein oatmeal and flaxseed arepa stuffed with chicken breast and avocado.",
-        "image": "Arepas_fit.png"
+        "id": 10, "day": "Viernes", "title": "Shrimp Wellness Bowl", "category": "Fitness", "active": False,
+        "desc": "Fresh seasoned grilled shrimp, avocado, cherry tomatoes, corn, black beans, and spinach.",
+        "image": "shrimp_wellness.png"
     }
 ]
 
+# Ruta principal para mostrar el menú activo en la página web
 @app.route('/')
 def index():
     menu_del_dia = {}
@@ -71,6 +72,7 @@ def index():
     
     return render_template('index.html', menu=menu_final)
 
+# Panel secreto protegido con la llave de acceso
 @app.route('/panel_secreto')
 def admin():
     llave = request.args.get('llave', '')
@@ -79,6 +81,7 @@ def admin():
     else:
         return redirect(url_for('index'))
 
+# Función para alternar la tanda activa desde el panel de administración
 @app.route('/toggle/<int:plato_id>')
 def toggle_plato(plato_id):
     llave = request.args.get('llave', '')

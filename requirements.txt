@@ -1,3 +1,5 @@
-Flask
-firebase-admin
+
+flask
 gunicorn
+firebase-admin
+requests
