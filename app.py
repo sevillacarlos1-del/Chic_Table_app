@@ -8,7 +8,7 @@ menu_items = [
     {
         "id": 1, "day": "Lunes", "title": "Coastal Steak Bowl", "category": "Balanced", "active": True,
         "desc": "Savor a succulent, marinated New York Strip steak, grilled to perfection and sliced over a bed of cilantro-lime brown rice.",
-        "image": "Costal_steak.png"
+        "image": "costal_steak.png"
     },
     {
         "id": 2, "day": "Martes", "title": "Chuleta de Cerdo", "category": "Balanced", "active": True,
@@ -18,7 +18,7 @@ menu_items = [
     {
         "id": 3, "day": "Miércoles", "title": "Executive Pabellón Moderno", "category": "Balanced", "active": True,
         "desc": "A refined twist on the Venezuelan classic. Slow-shredded flank steak is paired with caramelized plantains.",
-        "image": "Pabellon.png"
+        "image": "pabellon.png"
     },
     {
         "id": 4, "day": "Jueves", "title": "Chic Chicken Special", "category": "Balanced", "active": True,
@@ -35,7 +35,7 @@ menu_items = [
     {
         "id": 6, "day": "Lunes", "title": "Lean Power Bowl", "category": "Fitness", "active": False,
         "desc": "A nutrient-dense bowl with fluffy tri-color quinoa, roasted chickpeas and sweet potato.",
-        "image": "Lean_power.png"
+        "image": "lean_power.png"
     },
     {
         "id": 7, "day": "Martes", "title": "Chic Chicken Arepa Plate", "category": "Fitness", "active": False,
