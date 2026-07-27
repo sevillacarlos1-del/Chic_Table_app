@@ -1,6 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for
+
+from flask import Flask, render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
+# Llave secreta obligatoria para manejar las sesiones seguras del navegador
+app.secret_key = 'chic_table_secreto_super_seguro_2026'
 
 # BASE DE DATOS REORGANIZADA Y LIMPIA
 menu_items = [
@@ -72,21 +75,37 @@ def index():
     
     return render_template('index.html', menu=menu_final)
 
-# Panel secreto protegido con la llave de acceso
-@app.route('/panel_secreto')
+# Panel secreto protegido con formulario de contraseña y sesiones
+@app.route('/panel_secreto', methods=['GET', 'POST'])
 def admin():
-    llave = request.args.get('llave', '')
-    if llave == 'kelly2026':
+    # Si envían la contraseña por el formulario de login
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == 'kelly2026':  # Contraseña exclusiva para tu hija
+            session['autenticado'] = True
+            return redirect(url_for('admin'))
+        else:
+            return render_template('login.html', error="Contraseña incorrecta. Inténtalo de nuevo.")
+
+    # Si ya inició sesión correctamente, le mostramos el panel de administración
+    if session.get('autenticado'):
         return render_template('admin.html', todos_los_platos=menu_items)
-    else:
-        return redirect(url_for('index'))
+    
+    # Si no ha puesto la contraseña, lo mandamos a la pantalla de login limpia
+    return render_template('login.html', error=None)
+
+# Ruta para cerrar sesión (por seguridad)
+@app.route('/logout')
+def logout():
+    session.pop('autenticado', None)
+    return redirect(url_for('index'))
 
 # Función para alternar la tanda activa desde el panel de administración
 @app.route('/toggle/<int:plato_id>')
 def toggle_plato(plato_id):
-    llave = request.args.get('llave', '')
-    if llave != 'kelly2026':
-        return redirect(url_for('index'))
+    # Validar que esté autenticado por sesión
+    if not session.get('autenticado'):
+        return redirect(url_for('admin'))
 
     plato_seleccionado = next((p for p in menu_items if p['id'] == plato_id), None)
             
@@ -100,7 +119,7 @@ def toggle_plato(plato_id):
                     
         plato_seleccionado['active'] = nuevo_estado
 
-    return redirect(url_for('admin', llave='kelly2026'))
+    return redirect(url_for('admin'))
 
 if __name__ == '__main__':
     app.run(debug=True)
