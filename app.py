@@ -81,7 +81,7 @@ def admin():
     # Si envían la contraseña por el formulario de login
     if request.method == 'POST':
         password = request.form.get('password')
-        if password == 'kelly2026':  # Contraseña exclusiva para tu hija
+        if password == 'kelly.2026':  # Contraseña exclusiva para tu hija
             session['autenticado'] = True
             return redirect(url_for('admin'))
         else:
