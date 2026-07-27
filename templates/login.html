@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Restringido - Chic Table</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-[#ecebe6] text-[#333333] font-sans antialiased flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-[380px] bg-[#f9f8f4] p-8 rounded-[30px] border-4 border-[#D4AF37] shadow-2xl text-center">
+        <h1 class="text-2xl font-serif tracking-widest text-[#2c2620] uppercase font-bold mb-2">Chic Table</h1>
+        <p class="text-[10px] uppercase tracking-widest text-[#D4AF37] font-semibold mb-6">Acceso Exclusivo Backstage</p>
+        
+        <form method="POST" class="space-y-4">
+            <div>
+                <input type="password" name="password" placeholder="Introduce la contraseña" required 
+                    class="w-full px-4 py-3 text-sm rounded-xl border border-[#D4AF37]/50 bg-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] text-center">
+            </div>
+            
+            {% if error %}
+            <p class="text-[11px] text-red-600 font-semibold">{{ error }}</p>
+            {% endif %}
+
+            <button type="submit" class="w-full bg-[#2c2620] text-[#D4AF37] text-xs font-bold uppercase tracking-widest py-3 rounded-xl border border-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#2c2620] transition-all">
+                Entrar al Panel 🔒
+            </button>
+        </form>
+
+        <div class="mt-6">
+            <a href="/" class="text-[10px] text-gray-500 hover:text-[#2c2620] tracking-wider uppercase">← Volver al Menú Principal</a>
+        </div>
+    </div>
+</body>
+</html>
