@@ -1,26 +1,30 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>                                                                                                                                                      <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js').then(function(registration) {
-            console.log('ServiceWorker registrado correctamente');
-          }).catch(function(err) {
-            console.log('Error en ServiceWorker: ', err);
-          });
-        });
-      }
-    </script>
+<head>
+    <!-- 1. Configuración Básica y Viewport -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chic Table - Gourmet Menu</title>
+
+    <!-- 2. Metadatos PWA y Compatibilidad Móvil (Android / iOS Safari) -->
+    <meta name="theme-color" content="#2c2620">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Chic Table">
+
+    <!-- 3. Web App Manifest -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+
+    <!-- 4. Iconos de Aplicación (Favicon y Apple Touch Icon) -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo_original.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo_original.png') }}">
-    <meta name="theme-color" content="#2c2620">
+
+    <!-- 5. Hojas de Estilos y Frameworks -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 6. Estilos Personalizados 3D -->
     <style>
         .contenedor-3d { perspective: 1400px; perspective-origin: 50% 50%; }
         .plato-armado { position: relative; width: 280px; height: 280px; display: flex; align-items: center; justify-content: center; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); transform: rotateX(38deg) rotateZ(-15deg); transform-origin: center center; margin: 0 auto; }
@@ -40,6 +44,23 @@
         .ensamblado .plato     { transform: translate3d(0px, 0px, 0px); }
         ::-webkit-scrollbar { display: none; }
     </style>
+
+    <!-- 7. Registro del Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          // Utiliza la ruta estática o la ruta raíz '/sw.js' según tu backend Flask
+          const swUrl = "{{ url_for('static', filename='sw.js') }}";
+          navigator.serviceWorker.register(swUrl)
+            .then(function(registration) {
+              console.log('ServiceWorker registrado correctamente con alcance:', registration.scope);
+            })
+            .catch(function(err) {
+              console.log('Error en registro de ServiceWorker:', err);
+            });
+        });
+      }
+    </script>
 </head>
 <body class="bg-[#ecebe6] text-[#333333] font-sans antialiased flex justify-center py-0 md:py-10">
     <div class="w-full max-w-[430px] bg-[#f9f8f4] min-h-screen shadow-2xl md:rounded-[55px] md:border-[12px] border-[#1a1a1a] overflow-y-auto relative flex flex-col">
@@ -55,12 +76,12 @@
             
             <div class="w-full flex justify-center items-center my-4 h-[340px] contenedor-3d relative">
                 <div id="pabellon3D" class="plato-armado">
-                    <img src="{{ url_for('static', filename='capa_plato.png') }}" class="capa-comida plato bg-transparent border-none shadow-none">
-                    <img src="{{ url_for('static', filename='capa_caraotas.png') }}" class="capa-comida caraota bg-transparent border-none shadow-none">
-                    <img src="{{ url_for('static', filename='capa_arroz.png') }}" class="capa-comida arroz bg-transparent border-none shadow-none">
-                    <img src="{{ url_for('static', filename='capa_carne.png') }}" class="capa-comida carne bg-transparent border-none shadow-none">
-                    <img src="{{ url_for('static', filename='capa_tajadasi.png') }}" class="capa-comida tajada-i bg-transparent border-none shadow-none">
-                    <img src="{{ url_for('static', filename='capa_tajadasd.png') }}" class="capa-comida tajada-d bg-transparent border-none shadow-none">
+                    <img src="{{ url_for('static', filename='capa_plato.png') }}" class="capa-comida plato bg-transparent border-none shadow-none" alt="Plato base">
+                    <img src="{{ url_for('static', filename='capa_caraotas.png') }}" class="capa-comida caraota bg-transparent border-none shadow-none" alt="Caraotas">
+                    <img src="{{ url_for('static', filename='capa_arroz.png') }}" class="capa-comida arroz bg-transparent border-none shadow-none" alt="Arroz">
+                    <img src="{{ url_for('static', filename='capa_carne.png') }}" class="capa-comida carne bg-transparent border-none shadow-none" alt="Carne">
+                    <img src="{{ url_for('static', filename='capa_tajadasi.png') }}" class="capa-comida tajada-i bg-transparent border-none shadow-none" alt="Tajada izquierda">
+                    <img src="{{ url_for('static', filename='capa_tajadasd.png') }}" class="capa-comida tajada-d bg-transparent border-none shadow-none" alt="Tajada derecha">
                 </div>
                 <button onclick="ensamblarPlato()" id="btnAccion" class="absolute bottom-0 bg-[#2c2620] text-[#D4AF37] text-[10px] font-bold uppercase tracking-widest px-6 py-2 rounded-full border border-[#D4AF37]">Armar Plato</button>
             </div>
@@ -84,7 +105,7 @@
                     <div class="flex flex-col gap-2 border-b border-[#D4AF37]/30 pb-4">
                         <div class="flex items-center gap-4">
                             <div class="flex-shrink-0">
-                                <img src="{{ url_for('static', filename=plato.image) }}" class="w-20 h-20 object-cover rounded-xl border border-[#D4AF37]/25 bg-transparent shadow-none">
+                                <img src="{{ url_for('static', filename=plato.image) }}" alt="{{ plato.title }}" class="w-20 h-20 object-cover rounded-xl border border-[#D4AF37]/25 bg-transparent shadow-none">
                             </div>
                             <div class="flex flex-col flex-grow">
                                 <span class="text-[9px] font-bold text-[#D4AF37] uppercase tracking-widest">{{ plato.day }}</span>
@@ -92,9 +113,9 @@
                                 <p class="text-[11px] text-gray-600 mt-0.5 leading-tight">{{ plato.desc }}</p>
                             </div>
                         </div>
-                        <!-- Botón individual conectado al WhatsApp de Kelly (+19412989750) -->
+                        <!-- Botón individual conectado al WhatsApp de Kelly -->
                         <div class="text-right">
-                            <a href="https://wa.me/19412989750?text=Hola%20Chic%20Table,%20quiero%20pedir%20el%20men%C3%BAn%20del%20d%C3%ada%20{{ plato.day }}:%20{{ plato.title }}" target="_blank" class="inline-block bg-[#2c2620] text-[#D4AF37] text-[9px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border border-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#2c2620] transition-all duration-300">
+                            <a href="https://wa.me/19412989750?text=Hola%20Chic%20Table,%20quiero%20pedir%20el%20men%C3%BAn%20del%20d%C3%ada%20{{ plato.day }}:%20{{ plato.title }}" target="_blank" rel="noopener noreferrer" class="inline-block bg-[#2c2620] text-[#D4AF37] text-[9px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border border-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#2c2620] transition-all duration-300">
                                 Pedir {{ plato.day }} 📱
                             </a>
                         </div>
@@ -103,9 +124,9 @@
                 </div>
             </div>
 
-            <!-- PIE DE PÁGINA CON WHATSAPP DE SARASOTA Y ACCESO SECRETO -->
+            <!-- PIE DE PÁGINA CON WHATSAPP Y ACCESO SECRETO -->
             <div class="text-center mt-6 space-y-3">
-                <a href="https://wa.me/19412989750?text=Hola%20Chic%20Table,%20quiero%20hacer%20un%20pedido%20en%20Sarasota." target="_blank" class="block w-full bg-[#D4AF37] text-[#2c2620] text-[10px] font-bold uppercase tracking-[0.25em] py-3 rounded-xl shadow-md hover:bg-[#c29f31] transition-all">
+                <a href="https://wa.me/19412989750?text=Hola%20Chic%20Table,%20quiero%20hacer%20un%20pedido%20en%20Sarasota." target="_blank" rel="noopener noreferrer" class="block w-full bg-[#D4AF37] text-[#2c2620] text-[10px] font-bold uppercase tracking-[0.25em] py-3 rounded-xl shadow-md hover:bg-[#c29f31] transition-all">
                     Contactar por WhatsApp 💬
                 </a>
                 <a href="/panel_secreto?llave=kelly2026" class="inline-block text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] hover:text-[#2c2620] transition-colors duration-300">Backstage Access</a>
@@ -116,7 +137,9 @@
     <script>
         function ensamblarPlato() {
             const plato = document.getElementById('pabellon3D');
-            plato.classList.toggle('ensamblado');
+            if (plato) {
+                plato.classList.toggle('ensamblado');
+            }
         }
     </script>
 </body>
