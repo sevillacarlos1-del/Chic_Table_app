@@ -3,15 +3,15 @@
 Arquitectura: Proyecto_Chic_app/
   ├── main.py
   ├── assets/     (multimedia)
-  └── css/      (luxury_style.css)
+  └── css/        (luxury_style.css)
 """
 
-import streamlit as st
 import base64
-import urllib.parse  # Librería arriba y protegida para evitar caídas del servidor
+import urllib.parse
 from pathlib import Path
+import streamlit as st
 
-# ── Configuración de página ───────────────────────────────────────────────────
+# ── Configuración de la página ────────────────────────────────────────────────
 st.set_page_config(
     page_title="+CHIC | Luxury Gifts · Sarasota, FL",
     page_icon="✦",
@@ -19,7 +19,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# ── Rutas relativas ───────────────────────────────────────────────────────────
+# ── Rutas relativas seguras ───────────────────────────────────────────────────
 BASE_DIR = Path(__file__).parent
 ASSETS   = BASE_DIR / "assets"
 CSS_FILE = BASE_DIR / "css" / "luxury_style.css"
@@ -27,43 +27,68 @@ CSS_FILE = BASE_DIR / "css" / "luxury_style.css"
 WHATSAPP_NUMBER = "19412989750"
 WHATSAPP_BASE   = f"https://wa.me/{WHATSAPP_NUMBER}"
 
-# ── Helper: imagen → base64 ───────────────────────────────────────────────────
+
+# ── Caching & Performance Engine ──────────────────────────────────────────────
+@st.cache_data(show_spinner=False)
 def img_b64(filename: str) -> str:
-    """Devuelve un data-URI base64 listo para usar in <img src=...>. """
+    """
+    Convierte una imagen local a Data-URI base64 con caché de Streamlit.
+    Evita la lectura recurrente en disco en cada interacción.
+    """
     p = ASSETS / filename
     if not p.exists():
         return ""
-    mime = "image/jpeg" if str(p).lower().endswith(".jpg") else "image/png"
-    return f"data:{mime};base64,{base64.b64encode(p.read_bytes()).decode()}"
+    ext = str(p).lower()
+    mime = "image/jpeg" if ext.endswith((".jpg", ".jpeg")) else "image/png"
+    encoded = base64.b64encode(p.read_bytes()).decode("utf-8")
+    return f"data:{mime};base64,{encoded}"
 
-# ── Inyección de CSS externo + overrides Streamlit ───────────────────────────
+
+@st.cache_data(show_spinner=False)
+def load_css_file(css_path: Path) -> str:
+    """Carga en caché el contenido del archivo CSS externo."""
+    if css_path.exists():
+        try:
+            return css_path.read_text(encoding="utf-8")
+        except OSError:
+            return ""
+    return ""
+
+
+# ── Inyección de CSS Externo + Overrides de Lujo ─────────────────────────────
 def inject_css():
     st.markdown('<meta name="google" content="notranslate">', unsafe_allow_html=True)
-    try:
-        css_text = CSS_FILE.read_text(encoding="utf-8")
-        st.markdown(f"<style>{css_text}</style>", unsafe_allow_html=True)
-    except:
-        pass
+    
+    # Cargar archivo CSS externo si existe
+    css_external = load_css_file(CSS_FILE)
+    if css_external:
+        st.markdown(f"<style>{css_external}</style>", unsafe_allow_html=True)
 
+    # Estilos customizados inyectados
     st.markdown("""
     <style>
+    /* ── Tipografía oficial Google Fonts ── */
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
     /* ── Paleta y Comportamiento Global ── */
     :root { 
         --chic-white: #FFFFFF; 
         --chic-gold: #D4AF37; 
         --chic-gold-light: #FFE57F;
         --chic-gold-dark: #AA820A;
-        --chic-red: #8B0000; 
+        --chic-red: #8B0000;
+        --chic-dark: #1A1A1A;
+        --chic-bg: #FAFAF8;
     }
 
-    /* Activación del deslizamiento fluido */
+    /* Desplazamiento fluido */
     html, body, .stApp {
         scroll-behavior: smooth !important;
     }
 
-    /* Margen extra al fondo para asegurar que las páginas tengan espacio para moverse */
+    /* Fondo general */
     .stApp {
-        background-color: #FAFAF8 !important;
+        background-color: var(--chic-bg) !important;
         background-image:
             radial-gradient(at 0% 0%,    rgba(212,175,55,0.08) 0, transparent 55%),
             radial-gradient(at 100% 100%,rgba(139,0,0,0.05)    0, transparent 55%);
@@ -71,12 +96,12 @@ def inject_css():
         padding-bottom: 80px !important;
     }
 
-    /* ── Ocultar marcas de Streamlit ── */
+    /* ── Ocultar marcas por defecto de Streamlit ── */
     #MainMenu, header, footer { visibility: hidden !important; }
     [data-testid="stDecoration"]  { display: none !important; }
     [data-testid="stStatusWidget"]{ display: none !important; }
 
-    /* ── MOBILE-FIRST: contenedor principal ── */
+    /* ── Layout Contenedor Principal (Mobile-First) ── */
     .block-container {
         padding-top:    0    !important;
         padding-bottom: 40px !important;
@@ -93,7 +118,7 @@ def inject_css():
         }
     }
 
-    /* Márgenes blindados */
+    /* Ajustes estructurales de espacio */
     [data-testid="stVerticalBlock"]   { gap: 0 !important; padding: 0 !important; }
     [data-testid="column"]            { padding: 10px !important; background-color: transparent !important; }
     [data-testid="stHorizontalBlock"] { gap: 16px !important; background-color: transparent !important; }
@@ -112,16 +137,19 @@ def inject_css():
         padding: 0 !important;
         line-height: 0 !important;
         vertical-align: bottom !important;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
     }
 
-    /* ── Tarjetas de Producto ── */
+    /* ── Tarjetas de Producto & Cristal ── */
     .product-card, .glass-card, .contact-img {
         background: #FFFFFF !important;
         border: 2px solid #D4AF37 !important;
         border-radius: 16px !important;
         overflow: hidden !important;
         box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.18), 0 8px 24px rgba(170, 130, 10, 0.18) !important;
-        transition: all 0.35s ease-in-out !important;
+        transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.35s ease, border-color 0.35s ease !important;
         box-sizing: border-box !important;
         display: flex !important;
         flex-direction: column !important;
@@ -132,10 +160,10 @@ def inject_css():
     .product-card:hover, .glass-card:hover, .contact-img:hover {
         box-shadow: inset 0 0 22px rgba(212, 175, 55, 0.3), 0 14px 28px rgba(170, 130, 10, 0.25) !important;
         border-color: #F3E5AB !important;
-        transform: translateY(-4px);
+        transform: translateY(-5px);
     }
 
-    /* Botones de acción oro líquido */
+    /* Botón Oro Líquido */
     .btn-gold {
         background: linear-gradient(135deg, #FFE57F 0%, #D4AF37 50%, #AA820A 100%) !important;
         text-shadow: 0 1px 2px rgba(0,0,0,0.2);
@@ -159,8 +187,10 @@ def inject_css():
         margin-top: auto !important; 
         margin-bottom: 6px;
     }
+
     .btn-gold:hover {
-        box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4) !important;
+        box-shadow: 0 6px 18px rgba(212, 175, 55, 0.45) !important;
+        filter: brightness(1.05);
     }
 
     .product-price-bottom {
@@ -175,7 +205,7 @@ def inject_css():
     }
 
     .product-info { 
-        padding: 12px 14px 14px 14px !important;
+        padding: 14px 16px 16px 16px !important;
         text-align: center !important; 
         background: #FFFFFF !important; 
         display: flex !important;
@@ -184,7 +214,7 @@ def inject_css():
     }
     .product-name { 
         font-family: 'Playfair Display', serif !important; 
-        font-size: 1.05rem !important; 
+        font-size: 1.08rem !important; 
         font-weight: 600 !important; 
         color: #1A1A1A !important; 
         margin-top: 0px !important;
@@ -192,42 +222,46 @@ def inject_css():
     }
     .product-caption { 
         font-family: 'Montserrat', sans-serif !important; 
-        font-size: 0.74rem !important; 
+        font-size: 0.75rem !important; 
         color: #6B6B6B !important; 
-        line-height: 1.3 !important; 
+        line-height: 1.35 !important; 
         margin-bottom: 12px !important;
     }
-    .ornament { font-family: 'Montserrat', sans-serif; font-size: 0.68rem; letter-spacing: 0.25em; color: #D4AF37; text-transform: uppercase; }
-
-    .divider-gold {
-        height: 4px;
-        background: #D4AF37;
-        max-width: 150px;
-        margin: 40px auto;
-        box-shadow: 0 1px 4px rgba(170, 130, 10, 0.25);
+    .ornament { 
+        font-family: 'Montserrat', sans-serif; 
+        font-size: 0.68rem; 
+        letter-spacing: 0.25em; 
+        color: #D4AF37; 
+        text-transform: uppercase; 
     }
 
-    /* ── TABS NAVEGACIÓN PERFECCIONADAS EN DORADO METALIZADO ── */
+    .divider-gold {
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #D4AF37, transparent);
+        max-width: 220px;
+        margin: 36px auto;
+    }
+
+    /* ── Tabs de Navegación Metalizados ── */
     .stTabs [data-baseweb="tab-list"] {
         background: rgba(255,255,255,0.96);
         backdrop-filter: blur(14px);
         border-bottom: 2px solid #D4AF37;
         padding: 0 12px;
-        margin-top: 24px !important; /* Espaciado elegante bajo el título */
+        margin-top: 20px !important;
         position: sticky; top: 0; z-index: 999;
         overflow-x: auto;
         gap: 0;
         box-shadow: 0 4px 12px rgba(170, 130, 10, 0.05);
     }
     
-    /* Letras Doradas en estado normal */
     .stTabs [data-baseweb="tab"] {
         font-family: 'Montserrat', sans-serif !important;
         font-size:   0.74rem  !important;
         font-weight: 600      !important;
         letter-spacing: 0.14em !important;
         text-transform: uppercase !important;
-        color: #C5A028 !important; /* Dorado base fino */
+        color: #C5A028 !important;
         padding: 18px 20px !important;
         border:  none !important;
         background: transparent !important;
@@ -236,13 +270,11 @@ def inject_css():
         opacity: 0.85;
     }
     
-    /* Oro Líquido reflectivo cuando está seleccionado */
     .stTabs [aria-selected="true"] {
         color: #AA820A !important;
         background: linear-gradient(135deg, #AA820A 0%, #D4AF37 50%, #AA820A 100%) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
-        text-shadow: 0px 1px 1px rgba(212, 175, 55, 0.2) !important;
         border-bottom: 3px solid #D4AF37 !important;
         opacity: 1 !important;
         transform: scale(1.02);
@@ -253,7 +285,9 @@ def inject_css():
         opacity: 1;
     }
     
-    .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] { display: none !important; }
+    .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] { 
+        display: none !important; 
+    }
 
     .essence-grid {
         display: grid !important;
@@ -261,11 +295,14 @@ def inject_css():
         gap: 24px !important;
         padding: 10px 4px !important;
     }
-    @media (min-width: 640px)  { .essence-grid { grid-template-columns: repeat(3, 1fr) !important; } }
+    @media (min-width: 640px) { 
+        .essence-grid { grid-template-columns: repeat(3, 1fr) !important; } 
+    }
     
     .contact-img-wrap { margin-bottom: 20px !important; }
     </style>
     """, unsafe_allow_html=True)
+
 
 inject_css()
 
@@ -336,11 +373,12 @@ CATALOG = [
     },
 ]
 
-# ── Helper: botón WhatsApp HTML ───────────────────────────────────────────────
+
+# ── Helper: Botón WhatsApp ────────────────────────────────────────────────────
 def wa_button(msg: str, label: str = "✦ Order via WhatsApp") -> str:
     url = f"{WHATSAPP_BASE}?text={urllib.parse.quote(msg)}"
     return f"""
-    <a href="{url}" target="_blank" style="text-decoration:none; display:block; width:100%;">
+    <a href="{url}" target="_blank" rel="noopener noreferrer" style="text-decoration:none; display:block; width:100%;">
       <button class="btn-gold">
         <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="vertical-align:middle;">
           <path d="M12.031 21c-1.603 0-3.14-.407-4.498-1.182l-.322-.184-3.344.877.893-3.26-.202-.32A8.932 8.932 0 013.06 12.03C3.06 7.086 7.085 3.06 12.031 3.06c4.945 0 8.97 4.025 8.97 8.97 0 4.945-4.025 8.97-8.97 8.97zm4.83-6.338c-.264-.132-1.563-.771-1.805-.859-.242-.088-.418-.132-.594.132s-.682.859-.836 1.035c-.154.176-.308.198-.572.066-.264-.132-1.114-.41-2.122-1.308-.784-.699-1.313-1.562-1.467-1.826-.154-.264-.016-.407.116-.539.119-.118.264-.308.396-.462.132-.154.176-.264.264-.44.088-.176.044-.33-.022-.462-.066-.132-.594-1.43-.814-1.958-.214-.514-.432-.443-.594-.451l-.506-.009a.97.97 0 00-.704.33c-.242.264-.924.903-.924 2.201s.946 2.553 1.078 2.729c.132.176 1.861 2.84 4.509 3.982.63.272 1.122.434 1.506.556.633.201 1.209.173 1.664.105.507-.075 1.563-.639 1.783-1.257.22-.617.22-1.146.154-1.257-.066-.11-.242-.176-.506-.308z"/>
@@ -349,16 +387,16 @@ def wa_button(msg: str, label: str = "✦ Order via WhatsApp") -> str:
       </button>
     </a>"""
 
+
 # ── Render Tarjeta de Producto ────────────────────────────────────────────────
 def render_product_card(product: dict) -> str:
-    src      = img_b64(product["file"])
-    wa_html   = wa_button(product["msg"])
-    
-    price_val = product.get('price', '').strip()
+    src        = img_b64(product["file"])
+    wa_html    = wa_button(product["msg"])
+    price_val  = product.get('price', '').strip()
     price_html = f'<div class="product-price-bottom">{price_val}</div>' if price_val else ''
 
     img_html = (
-        f'<img src="{src}" alt="{product["name"]}"'
+        f'<img src="{src}" alt="{product["name"]}" loading="lazy"'
         f' style="width:100%;height:100%;object-fit:cover;display:block;margin:0;padding:0;">'
         if src else
         f'<div style="display:flex;align-items:center;justify-content:center;'
@@ -377,6 +415,7 @@ def render_product_card(product: dict) -> str:
         {wa_html}
       </div>
     </div>"""
+
 
 # ── Render Catálogo ───────────────────────────────────────────────────────────
 def render_catalog():
@@ -398,13 +437,14 @@ def render_catalog():
         with cols[i % 3]:
             st.markdown(render_product_card(p), unsafe_allow_html=True)
 
+
 # ── Tab: INICIO ───────────────────────────────────────────────────────────────
 def render_inicio():
     st.markdown("""
     <section style="text-align:center;padding:48px 16px 20px;">
       <p class="ornament">✦ LUXURY BOUTIQUE ✦</p>
-      <h1 class="hero-title animate__animated animate__fadeInDown" style="margin:16px 0 20px;">+CHIC</h1>
-      <p class="hero-subtitle animate__animated animate__fadeInUp animate__delay-1s" style="margin:0 auto 24px;">
+      <h1 class="hero-title" style="font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4rem);color:#8B0000;margin:16px 0 20px;font-weight:700;">+CHIC</h1>
+      <p class="hero-subtitle" style="font-family:'Montserrat',sans-serif;font-size:1rem;color:#6B6B6B;margin:0 auto 24px;letter-spacing:0.05em;">
         Luxury gifts for unforgettable moments.
       </p>
     </section>
@@ -442,7 +482,7 @@ def render_inicio():
         src = img_b64(img)
         img_tag = (
             f'<div class="product-img-wrap" style="position:relative;overflow:hidden;aspect-ratio:4/3;">'
-            f'<img src="{src}" alt="{title}" style="width:100%;height:100%;display:block;margin:0;object-fit:cover;">'
+            f'<img src="{src}" alt="{title or "+CHIC"}" style="width:100%;height:100%;display:block;margin:0;object-fit:cover;">'
             f'</div>'
             if src else ""
         )
@@ -476,6 +516,7 @@ def render_inicio():
       </p>
     </div>
     """, unsafe_allow_html=True)
+
 
 # ── Tab: CONTACTO ─────────────────────────────────────────────────────────────
 def render_contacto():
@@ -522,7 +563,7 @@ def render_contacto():
             <p style="font-family:Montserrat,sans-serif;font-size:0.72rem;
                        letter-spacing:0.18em;color:#D4AF37;text-transform:uppercase;
                        margin-bottom:6px;">Direct WhatsApp</p>
-            <p style="font-family:Montserrat,sans-serif;font-size:0.9rem;color:#1A1A1A;">
+            <p style="font-family:Montserrat,sans-serif;font-size:0.9rem;color:#1A1A1A;font-weight:600;">
               +1 (941) 298-9750
             </p>
           </div>
@@ -531,7 +572,7 @@ def render_contacto():
             <p style="font-family:Montserrat,sans-serif;font-size:0.72rem;
                        letter-spacing:0.18em;color:#D4AF37;text-transform:uppercase;
                        margin-bottom:6px;">Instagram</p>
-            <p style="font-family:Montserrat,sans-serif;font-size:0.9rem;color:#1A1A1A;">
+            <p style="font-family:Montserrat,sans-serif;font-size:0.9rem;color:#1A1A1A;font-weight:600;">
               @chic.fl
             </p>
           </div>
@@ -562,6 +603,7 @@ def render_contacto():
         </div>
         """, unsafe_allow_html=True)
 
+
 # ── FOOTER ────────────────────────────────────────────────────────────────────
 def render_footer():
     st.markdown("""
@@ -573,7 +615,7 @@ def render_footer():
       </p>
       <p class="ornament" style="margin-bottom:16px;">© 2026 +CHIC L.L.C. · Luxury Gifts · Sarasota, FL</p>
       <div style="display:flex;gap:20px;justify-content:center;">
-        <a href="https://instagram.com/chic.fl" target="_blank"
+        <a href="https://instagram.com/chic.fl" target="_blank" rel="noopener noreferrer"
            style="font-family:Montserrat,sans-serif;font-size:0.75rem;
                   letter-spacing:0.12em;color:#6B6B6B;text-decoration:none;
                   transition:color 0.3s;"
@@ -582,7 +624,7 @@ def render_footer():
           Instagram
         </a>
         <span style="color:#D4AF37;">·</span>
-        <a href="https://wa.me/19412989750" target="_blank"
+        <a href="https://wa.me/19412989750" target="_blank" rel="noopener noreferrer"
            style="font-family:Montserrat,sans-serif;font-size:0.75rem;
                   letter-spacing:0.12em;color:#6B6B6B;text-decoration:none;"
            onmouseover="this.style.color='#D4AF37'"
@@ -592,6 +634,7 @@ def render_footer():
       </div>
     </footer>
     """, unsafe_allow_html=True)
+
 
 # ── NAVEGACIÓN PRINCIPAL (st.tabs) ────────────────────────────────────────────
 tab_inicio, tab_catalogo, tab_contacto = st.tabs(["✦ INICIO", "✦ CATALOG", "✦ CONTACT"])
