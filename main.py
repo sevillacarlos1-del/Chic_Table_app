@@ -2,7 +2,7 @@
 +CHIC — Boutique de Lujo | main.py
 Arquitectura: Proyecto_Chic_app/
   ├── main.py
-  ├── assets/    (multimedia)
+  ├── assets/     (multimedia)
   └── css/      (luxury_style.css)
 """
 
@@ -66,7 +66,7 @@ def inject_css():
         background-color: #FAFAF8 !important;
         background-image:
             radial-gradient(at 0% 0%,    rgba(212,175,55,0.08) 0, transparent 55%),
-            radial-gradient(at 100% 100%,rgba(139,0,0,0.05)   0, transparent 55%);
+            radial-gradient(at 100% 100%,rgba(139,0,0,0.05)    0, transparent 55%);
         background-attachment: fixed;
         padding-bottom: 80px !important;
     }
@@ -275,9 +275,9 @@ CATALOG = [
         "file":    "regalo1.jpg",
         "name":    "Gift Set Elite",
         "caption": "Premium hand-curated gift box. Perfect for celebrating unique moments.",
-        "price":    "", 
+        "price":   "", 
         "msg":     "Hi! I'm interested in the Gift Set Elite. Is it available?",
-    },                                                                               
+    },                                                                           
     {
         "file":    "regalo2_nuevo.jpg",
         "name":    "Golden Arrangement",
@@ -410,7 +410,6 @@ def render_inicio():
     </section>
     """, unsafe_allow_html=True)
 
-    # Botón único de contacto premium centrado, sin el botón problemático de abajo
     c1, c2, c3 = st.columns([1.2, 1.6, 1.2])
     with c2:
         st.markdown(wa_button(
