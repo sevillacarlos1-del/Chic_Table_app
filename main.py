@@ -1,7 +1,7 @@
 """
-+CHIC — Boutique de Lujo | main.py
+CHIC — Boutique de Lujo | main.py
 Versión corregida con ajustes visuales de Hero, colores de etiqueta y logo de globos.
-Arquitectura: Proyecto_Chic_app/
+Arquitectura: proyecto_+Chic_app/
   ├── main.py
   ├── static/     (manifest.json, sw.js, iconos)
   ├── assets/     (multimedia)

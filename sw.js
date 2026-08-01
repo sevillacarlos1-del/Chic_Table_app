@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chic-luxury-v1';
+const CACHE_NAME = '+chic-luxury-v1';
 const urlsToCache = [
   '/',
   '/manifest.json'

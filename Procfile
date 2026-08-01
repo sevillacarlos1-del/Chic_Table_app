@@ -1,1 +1,0 @@
-python -m streamlit run aplicación.py --server.port=$PORT --server.address=0.0.0.0
